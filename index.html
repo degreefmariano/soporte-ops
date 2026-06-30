@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" data-tab="cola">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Centro de soporte — Demo de gestión de tickets</title>
+<meta name="description" content="Demo de panel de gestión de tickets de soporte técnico: cola priorizada con SLA, diagnóstico de incidentes, base de conocimiento y tendencias. Proyecto de portfolio de Mariano De Greef." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="dot-status" aria-hidden="true"></span>
+      <span class="brand">soporte<span class="brand-accent">.ops</span></span>
+      <span class="brand-sub">demo de portfolio</span>
+    </div>
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab-btn is-active" data-tab-target="cola">Cola de tickets</button>
+      <button class="tab-btn" data-tab-target="conocimiento">Base de conocimiento</button>
+      <button class="tab-btn" data-tab-target="tendencias">Tendencias</button>
+    </nav>
+    <div class="topbar-right">
+      <button class="btn btn-primary" id="btn-new-ticket"><span class="plus">+</span> Nuevo ticket</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ===== COLA DE TICKETS ===== -->
+    <section class="view" data-view="cola">
+      <aside class="rail">
+        <div class="rail-block">
+          <h2 class="rail-title">Prioridad</h2>
+          <div class="chip-group" id="filter-priority">
+            <button class="chip chip-p1" data-priority="P1">P1<span class="chip-n" data-count-priority="P1"></span></button>
+            <button class="chip chip-p2" data-priority="P2">P2<span class="chip-n" data-count-priority="P2"></span></button>
+            <button class="chip chip-p3" data-priority="P3">P3<span class="chip-n" data-count-priority="P3"></span></button>
+            <button class="chip chip-p4" data-priority="P4">P4<span class="chip-n" data-count-priority="P4"></span></button>
+          </div>
+        </div>
+
+        <div class="rail-block">
+          <h2 class="rail-title">Estado</h2>
+          <select class="select" id="filter-estado">
+            <option value="">Todos</option>
+            <option>Abierto</option>
+            <option>En progreso</option>
+            <option>Escalado</option>
+            <option>Resuelto</option>
+          </select>
+        </div>
+
+        <div class="rail-block">
+          <h2 class="rail-title">Buscar</h2>
+          <input class="input" id="filter-search" type="text" placeholder="Cliente, asunto o ID..." />
+        </div>
+
+        <div class="rail-block rail-summary">
+          <h2 class="rail-title">Resumen del día</h2>
+          <div class="summary-row"><span>Tickets abiertos</span><strong id="sum-abiertos">—</strong></div>
+          <div class="summary-row"><span>SLA en riesgo</span><strong id="sum-riesgo" class="text-warn">—</strong></div>
+          <div class="summary-row"><span>SLA vencido</span><strong id="sum-vencido" class="text-danger">—</strong></div>
+          <div class="summary-row"><span>Resueltos hoy</span><strong id="sum-resueltos" class="text-ok">—</strong></div>
+        </div>
+      </aside>
+
+      <div class="queue-wrap">
+        <div class="queue-header">
+          <span>Ordenado por prioridad e impacto en SLA</span>
+          <span id="queue-count" class="queue-count"></span>
+        </div>
+        <div class="queue-table" id="queue-table" role="table" aria-label="Cola de tickets"></div>
+      </div>
+    </section>
+
+    <!-- ===== BASE DE CONOCIMIENTO ===== -->
+    <section class="view" data-view="conocimiento" hidden>
+      <div class="kb-header">
+        <div>
+          <h2 class="view-title">Base de conocimiento</h2>
+          <p class="view-sub">Artículos internos de referencia para diagnóstico y resolución, al estilo Confluence.</p>
+        </div>
+        <input class="input kb-search" id="kb-search" type="text" placeholder="Buscar artículo o categoría..." />
+      </div>
+      <div class="kb-grid" id="kb-grid"></div>
+    </section>
+
+    <!-- ===== TENDENCIAS ===== -->
+    <section class="view" data-view="tendencias" hidden>
+      <h2 class="view-title">Tendencias e indicadores</h2>
+      <p class="view-sub">Detección de patrones recurrentes para proponer mejoras preventivas de producto o proceso.</p>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Tickets este período</span>
+          <span class="metric-value" id="m-total">—</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Tiempo prom. de resolución</span>
+          <span class="metric-value" id="m-mttr">—</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Cumplimiento de SLA</span>
+          <span class="metric-value" id="m-sla">—</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Categoría más recurrente</span>
+          <span class="metric-value metric-value-sm" id="m-top-cat">—</span>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3 class="chart-title">Tickets por prioridad</h3>
+          <div class="chart-box"><canvas id="chart-priority"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Categorías recurrentes</h3>
+          <div class="chart-box"><canvas id="chart-category"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== DETALLE DE TICKET (drawer) ===== -->
+  <div class="drawer-overlay" id="drawer-overlay">
+    <aside class="drawer" id="drawer" role="dialog" aria-label="Detalle del ticket">
+      <div id="drawer-content"></div>
+    </aside>
+  </div>
+
+  <!-- ===== NUEVO TICKET (modal) ===== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" role="dialog" aria-label="Nuevo ticket">
+      <h2 class="modal-title">Nuevo ticket</h2>
+      <form id="form-new-ticket">
+        <label class="field">
+          <span>Cliente</span>
+          <input class="input" name="cliente" required placeholder="Nombre del cliente" />
+        </label>
+        <label class="field">
+          <span>Asunto</span>
+          <input class="input" name="asunto" required placeholder="Resumen breve del problema" />
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Categoría</span>
+            <input class="input" name="categoria" required placeholder="Ej: Integraciones" />
+          </label>
+          <label class="field">
+            <span>Prioridad</span>
+            <select class="select" name="prioridad">
+              <option value="P1">P1 — Crítico</option>
+              <option value="P2">P2 — Alto</option>
+              <option value="P3" selected>P3 — Medio</option>
+              <option value="P4">P4 — Bajo</option>
+            </select>
+          </label>
+        </div>
+        <label class="field">
+          <span>Descripción inicial</span>
+          <textarea class="input" name="diagnostico" rows="3" placeholder="Qué reporta el cliente, primeros pasos de diagnóstico..."></textarea>
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn" id="btn-cancel-new">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Crear ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
